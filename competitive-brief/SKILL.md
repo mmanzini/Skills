@@ -5,8 +5,6 @@ argument-hint: "<competitor or feature area>"
 
 # Competitive Brief
 
-> If you see unfamiliar placeholders or need to check which tools are connected, see [CONNECTORS.md](../CONNECTORS.md).
-
 Create a competitive analysis brief for one or more competitors or a feature area.
 
 ## Usage
