@@ -408,6 +408,6 @@ MIT: See [LICENSE](LICENSE) for details.
 
 ## ⭐ Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=nidhinjs/prompt-master&type=Date)](https://star-history.com/#nidhinjs/claude-skills&Date)
+[![[8648e3225d751c51c8e93b86806a806c_MD5.svg]]](https://star-history.com/#nidhinjs/claude-skills&Date)
 
 ---
