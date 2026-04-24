@@ -1,11 +1,11 @@
 ---
 name: reverie
-description: "Nexus-wide vault consolidation — short-term to long-term memory. Runs Intelligence consolidate+refine across all pseudo-RAG vaults, sweeps every top-level Nexus folder for recent signal, reconciles Context/memory.md and Context/about-me.md against that signal, handles conflicts, and logs the outcome. Use when the user says 'reverie', '/reverie', 'refresh Nexus', 'update memory', 'consolidate the vault', or asks for a full-vault reflective pass."
+description: "Nexus-wide vault consolidation — short-term to long-term memory. Runs Intelligence consolidate+refine across all pseudo-RAG vaults, sweeps every top-level Nexus folder for recent signal, reconciles Context/nexus-nav.md, Context/nexus-now.md, and Context/about-me.md against that signal, handles conflicts, and logs the outcome. Use when the user says 'reverie', '/reverie', 'refresh Nexus', 'update memory', 'consolidate the vault', or asks for a full-vault reflective pass."
 ---
 
 # Reverie: Nexus-wide consolidation
 
-You are performing a reverie — a reflective pass over the entire Nexus vault. Intelligence vaults absorb their own short-term inputs (via their `consolidate`/`refine` verbs); you then sweep every top-level folder for activity and reconcile `Context/memory.md` and `Context/about-me.md` against what's actually true now.
+You are performing a reverie — a reflective pass over the entire Nexus vault. Intelligence vaults absorb their own short-term inputs (via their `consolidate`/`refine` verbs); you then sweep every top-level folder for activity and reconcile `Context/nexus-nav.md` (stable navigation), `Context/nexus-now.md` (live state), and `Context/about-me.md` against what's actually true now.
 
 This is distinct from the Anthropic `dream` skill, which only consolidates `~/.claude` memory files. Reverie is about the Obsidian vault.
 
@@ -35,10 +35,11 @@ Reverie is typically invoked unattended (nightly scheduled task at 21:00 local).
 
 ## Phase 0 — Orient
 
-1. Read `Context/memory.md` end-to-end. Note every `##` section heading and its current content — this is the baseline you'll diff against.
-2. Read `Context/about-me.md`.
-3. Read `Context/reverie-log.md` if it exists. The most recent entry's ISO timestamp is `last_reverie_at`. If the file does not exist, set `last_reverie_at` to 7 days ago.
-4. `ls` the Nexus root. Every top-level folder is in scope for the sweep. Classify:
+1. Read `Context/nexus-nav.md` end-to-end. Note every `##` section heading and its current content — baseline for Phase 3a.
+2. Read `Context/nexus-now.md` end-to-end. Note every `##` section heading and its current content — baseline for Phase 3b.
+3. Read `Context/about-me.md`.
+4. Read `Context/reverie-log.md` if it exists. The most recent entry's ISO timestamp is `last_reverie_at`. If the file does not exist, set `last_reverie_at` to 7 days ago.
+5. `ls` the Nexus root. Every top-level folder is in scope for the sweep. Classify:
    - **Known-typed** (have specialized sweep prompts below): `Context/`, `Intelligence/`, `Projects/`, `Resources/`, `Daily/`, `Skills/`, `Tasks/`.
    - **Unknown** (anything else): use the generic unknown-folder probe.
 
@@ -67,8 +68,8 @@ Spawn **one subagent per top-level folder** discovered in Phase 0, all in a sing
 
 Specialised prompts per folder type:
 
-- **Context/** — check whether `memory.md`, `about-me.md`, `writing-rules.md`, or `CLAUDE.md` structure (section headings, not content) changed since `last_reverie_at`. Usually nothing; report `no change` if so.
-- **Intelligence/** — for each pseudo-RAG vault, diff `_master-index.md` against its state at `last_reverie_at` (use git if available, otherwise just list what's there). Report topics added. Check free-form subfolders (`competitors/`, `decisions/`, `market/`, `processes/`, `transcriptions/`) — report any that now hold material (`memory.md` lists these only once populated).
+- **Context/** — check whether `nexus-nav.md`, `nexus-now.md`, `about-me.md`, `writing-rules.md`, or `CLAUDE.md` structure (section headings, not content) changed since `last_reverie_at`. Usually nothing; report `no change` if so.
+- **Intelligence/** — for each pseudo-RAG vault, diff `_master-index.md` against its state at `last_reverie_at` (use git if available, otherwise just list what's there). Report topics added. Check free-form subfolders (`decisions/`, `processes/`, `transcriptions/`) — report any that now hold material (`nexus-nav.md` lists these only once populated).
 - **Projects/** — for each project folder: does it still exist? has `CLAUDE.md`? any content modified since `last_reverie_at`? signs of archival (empty, `ARCHIVED` marker, no recent mtime)? If a project's CLAUDE.md grew a verb list (new slash-commands), report the full updated list.
 - **Resources/** — each subfolder is a candidate (currently `frameworks/`, `prompts/`, `templates/`, `tools/`). Report adds/removes at depth 2. For `frameworks/`, also report per-framework CLAUDE.md presence and content changes.
 - **Daily/** — read every `Daily/YYYY-MM-DD.md` with filename date newer than `last_reverie_at`. Extract from each: `### Decisions & agreements`, `### Model insights`, tool mentions (for about-me), working-style observations, and any line starting with "remember that" / "don't forget" / similar explicit retention asks. Aggregate across all daily notes — recurring themes are worth reporting once with a count, one-offs can be listed verbatim.
@@ -80,9 +81,9 @@ Each subagent returns a structured report, not prose. Main agent never holds raw
 
 ---
 
-## Phase 3 — Reconcile `memory.md` (section-scalable)
+## Phase 3a — Reconcile `nexus-nav.md` (structural deltas only)
 
-`memory.md` sections are a living map over what exists in the vault, NOT a fixed schema. Walk the current file section by section, apply the rules below, and produce the updated file.
+`nexus-nav.md` is the stable navigation index. Edit only when vault structure changed (new/renamed/removed project, KB, framework, skill, verb). This usually fires on few runs — if nothing structural changed, report "no change" and move on.
 
 ### Section lifecycle
 
@@ -93,39 +94,45 @@ Each subagent returns a structured report, not prose. Main agent never holds raw
   - folder has ≥3 files with non-trivial content, OR
   - folder exposes verbs (slash-commands mentioned in a CLAUDE.md).
   - Below threshold → do NOT add a section. Record in the reverie log under `Watching:`.
-- **Rename** — if an old folder name is in `memory.md` but a same-kind folder exists under a new name, rename in place (don't remove-then-add). Use CLAUDE.md content or obvious naming overlap as the hint.
+- **Rename** — if an old folder name is in `nexus-nav.md` but a same-kind folder exists under a new name, rename in place (don't remove-then-add). Use CLAUDE.md content or obvious naming overlap as the hint.
 
-Formatting for any new section must match the existing style in `memory.md`: wikilinks in the form `[[folder/CLAUDE|Display Name]]`, two-space indent for continuation lines, no bullet sub-structure.
+Formatting for any new section must match the existing style in `nexus-nav.md`: wikilinks in the form `[[folder/CLAUDE|Display Name]]`, two-space indent for continuation lines, no bullet sub-structure.
 
 ### Per-section update rules
 
 - **`## Projects`** — add new projects (with `(no CLAUDE.md yet)` marker if absent), rename, remove when gone, refresh the verb list when a project's CLAUDE.md grew.
 - **`## Knowledge bases`** — update free-form subfolder entries only when they hold material. Don't invent verbs — only record verbs that actually exist in a vault's CLAUDE.md.
 - **`## Frameworks`** — same rules as Projects, applied to `Resources/frameworks/*`.
-- **`## Live decisions & watch-list`**:
-  - **Add** new decisions from Daily `### Decisions & agreements`, timestamped `YYYY-MM-DD`, deduplicated against existing entries.
-  - **Resolve** old items that have a matching "done" decision in a newer Daily note — remove them.
-  - **Prune** items older than 30 days with no activity → remove from `memory.md` and record under `Archived:` in the reverie log entry.
-- **`## Remember (user-asked)`** — only touch when Daily notes contain an explicit user retention ask ("remember that X", "don't forget Y"). Otherwise leave untouched. Never auto-prune.
+- **`## Skills`** — add a line when a new skill appears in `Skills/`; remove when a folder is gone. Keep the existing grouping (Vault ops / Research / Writing / PM artefacts / Decision / Engineering / Utilities). New skill with no obvious group → place under Utilities and flag in reverie log.
 
-### Sections you must NOT change
+### Sections in `nexus-nav.md` you must NOT change
 
 - `## How to use`
 - `## Companion context files`
+- `## Routing rules`
 
 These are the rulebook. They don't derive from activity.
 
-### First-run idempotent addition
+---
 
-If `memory.md` does NOT yet contain a `## Reverie` section, add this one-liner near the bottom (after `## Live decisions & watch-list`):
+## Phase 3b — Reconcile `nexus-now.md` (state deltas)
 
-```markdown
-## Reverie
+`nexus-now.md` is the live state layer. This is where the bulk of reverie's writes land.
 
-Last run and history: [[Context/reverie-log|reverie-log]]. Run `/reverie` to refresh Nexus navigation, Intelligence vaults, and identity context.
-```
+### Per-section update rules
 
-Idempotent: if it's already there, leave it.
+- **`## Current focus`** — rewrite if Daily notes show a new dominant theme (appears in ≥3 distinct Daily notes in the last 7 days). Keep to 3–5 lines.
+- **`## Live decisions & watch-list`**:
+  - **Add** new decisions from Daily `### Decisions & agreements`, timestamped `YYYY-MM-DD`, deduplicated against existing entries.
+  - **Resolve** old items that have a matching "done" decision in a newer Daily note — remove them.
+  - **Prune** items older than 30 days with no activity → remove from `nexus-now.md` and record under `Archived:` in the reverie log entry.
+- **`## Remember (user-asked)`** — only touch when Daily notes contain an explicit user retention ask ("remember that X", "don't forget Y"). Otherwise leave untouched. Never auto-prune.
+- **`## Status trackers`** — update existing sub-sections (e.g. `### Job search`) with deltas from Daily notes. Add a new sub-section only if an ongoing situation appears in ≥3 Daily notes and has its own cadence (not a one-off decision).
+
+### Sections in `nexus-now.md` you must NOT change
+
+- `## Update policy`
+- `## Reverie` (except if the pointer target changes)
 
 ---
 
@@ -135,7 +142,7 @@ Conservative. Only edit when Daily signal meets a clear threshold:
 
 - **Tools I actually use** — add a tool when it's mentioned in ≥3 distinct Daily notes and isn't already listed. Remove a tool that hasn't appeared in any Daily note in the last 30 days (but only if confidence is high — "I stopped using X" beats absence alone).
 - **Working style** — add a pattern only when the user explicitly confirmed it ("yes, keep doing that", "that's exactly right"). Absence of correction is not confirmation.
-- **Day-one assumptions for any agent working with me** — same rule as Working style.
+- **Day-one assumptions for any agent working with me** — same rule as Working style. Note: the "update without being asked" rule lives canonically in `nexus-now.md` under `## Update policy`; do not re-add it here.
 - **Domains of work** — add a new domain when it appears in ≥5 distinct Daily notes and has its own decisions/output, not just incidental mentions.
 
 If nothing meets the bar, leave the file untouched and record "no change" in the reverie log.
@@ -150,9 +157,9 @@ If nothing meets the bar, leave the file untouched and record "no change" in the
 
 When signals disagree, resolve using this strict priority:
 
-1. **Folder state beats `memory.md` claim.** If `memory.md` lists a project that no longer exists as a folder, remove it. (`Context/CLAUDE.md` already codifies this: "If `memory.md` conflicts with a live observation, trust what you observe.")
-2. **Newer decision beats older.** A Daily from this week that contradicts a `## Live decisions` entry from last month replaces the entry. Note the supersession in the reverie log.
-3. **Explicit user ask beats inference.** `## Remember (user-asked)` items are never auto-pruned or auto-edited.
+1. **Folder state beats `nexus-nav.md` claim.** If `nexus-nav.md` lists a project, KB, framework, or skill that no longer exists, remove it. (`Context/CLAUDE.md` already codifies this: "If either file conflicts with a live observation, trust what you observe.")
+2. **Newer decision beats older.** A Daily from this week that contradicts a `## Live decisions` entry in `nexus-now.md` from last month replaces the entry. Note the supersession in the reverie log.
+3. **Explicit user ask beats inference.** `## Remember (user-asked)` items in `nexus-now.md` are never auto-pruned or auto-edited.
 4. **Unresolvable conflicts get flagged, not guessed.** Two Daily notes disagreeing, neither clearly newer or authoritative → leave both versions in place and record under `### Unresolved` in the reverie log entry for user review. Do NOT pick a side.
 
 ---
@@ -172,12 +179,13 @@ Entry format (each entry ≤15 lines):
 ```markdown
 ## 2026-04-22T18:30 — reverie run
 - Intelligence: tech-research +3 articles, political-economy +1, github-trends +2; 6 source files cleared. Refine flagged 2 missing cross-links.
-- memory.md sections changed: [section names with one-word action, e.g. "Projects +1 -1, Frameworks +1, new section Skills"].
-- memory.md Live decisions: +N added, -N resolved, -N archived.
+- nexus-nav.md sections changed: [section names with one-word action, e.g. "Projects +1 -1, Frameworks +1, Skills +2" | no change].
+- nexus-now.md Live decisions: +N added, -N resolved, -N archived.
+- nexus-now.md other sections: [Current focus rewritten | Status trackers updated | no other change].
 - about-me.md: [one-line summary | no change].
 - Watching: [sub-threshold candidates — folder names only].
 - Archived (30-day rule): [decisions removed from watch-list].
-- Superseded: [memory.md claims replaced by newer Daily decisions].
+- Superseded: [nexus-now.md claims replaced by newer Daily decisions].
 - Unresolved: [conflicts with both sides, user attention needed | none].
 - Next cutoff: 2026-04-22
 ```
@@ -197,8 +205,11 @@ When invoked with `--dry-run`:
 - In Phases 3–6, compute the intended changes but print a unified-diff-style preview of what would be written instead of writing. Preview format:
 
 ```
-=== Context/memory.md ===
-<diff>
+=== Context/nexus-nav.md ===
+<diff | no change>
+
+=== Context/nexus-now.md ===
+<diff | no change>
 
 === Context/about-me.md ===
 <diff | no change>
@@ -223,8 +234,11 @@ Return this exact structure after a run:
 - political-economy: [summary]
 - github-trends: [summary]
 
-### memory.md
-- [what changed, by section. Be specific: "Projects: added Experiments (has CLAUDE.md); removed Open Data apps investigation (folder gone)"]
+### nexus-nav.md
+- [structural changes, by section. Be specific: "Projects: added Experiments (has CLAUDE.md); removed Open Data apps investigation (folder gone)" | no change]
+
+### nexus-now.md
+- [state changes: Live decisions +N -N, Status trackers updates, Current focus rewrite | no change]
 
 ### about-me.md
 - [changed: <one-line summary> | no change]
@@ -245,7 +259,7 @@ Keep it terse. The log file has the detail; this output is the scannable summary
 - **Procedurally simple.** This is one SKILL.md file. No scripts, no templates.
 - **Merge > duplicate.** Update existing entries rather than adding parallel ones.
 - **Absolute dates only.** Convert every "yesterday" / "last week" / "a few days ago" to an ISO date before writing.
-- **Bounded state.** `memory.md` stays scannable. `reverie-log.md` caps at 20 entries. Neither grows unbounded.
+- **Bounded state.** `nexus-nav.md` and `nexus-now.md` stay scannable. `reverie-log.md` caps at 20 entries. Nothing grows unbounded.
 - **Folder-agnostic.** The sweep discovers folders dynamically. Never hard-code the folder list.
 - **Delegate, don't re-implement.** Intelligence consolidate/refine lives in `Intelligence/CLAUDE.md`. Reverie orchestrates; vault CLAUDE.md files execute.
 
@@ -254,4 +268,5 @@ Keep it terse. The log file has the detail; this output is the scannable summary
 - `Context/writing-rules.md` — external constraint, not derived from activity.
 - `~/.claude/projects/.../memory/` — that's the original `dream` skill's scope.
 - `Daily/*.md` files — historical record, never deleted or edited.
-- `## How to use` and `## Companion context files` sections of `memory.md` — rulebook, not activity-derived.
+- `## How to use`, `## Companion context files`, and `## Routing rules` sections of `nexus-nav.md` — rulebook, not activity-derived.
+- `## Update policy` section of `nexus-now.md` — rulebook for the file itself.
