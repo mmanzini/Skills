@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Extract metadata, transcript and description links from a YouTube video.
-Outputs a JSON object with: title, channel, video_url, raw_transcript, description_links.
+Extract metadata, transcript, description text and links from a YouTube video.
+Outputs a JSON object with:
+  title, channel, video_url, description, raw_transcript, description_links.
 """
 
 import sys
@@ -62,10 +63,15 @@ def fetch_transcript(video_id: str) -> str:
     return "\n".join(lines)
 
 
-def fetch_description_links(video_id: str) -> list[dict]:
+def fetch_description_data(video_id: str) -> dict:
     """
-    Scrape the YouTube page HTML for ytInitialData and extract links
-    from the video description. Returns a list of {text, url} dicts.
+    Scrape the YouTube page HTML for ytInitialData and extract:
+    - The full plain-text description
+    - Links embedded in the description
+
+    Returns a dict with keys:
+      - "description": str  -- full description text as shown on YouTube
+      - "links": list of {text, url}
     """
     page_url = f"https://www.youtube.com/watch?v={video_id}"
     req = urllib.request.Request(page_url, headers={
@@ -79,19 +85,20 @@ def fetch_description_links(video_id: str) -> list[dict]:
     try:
         html = urllib.request.urlopen(req, timeout=15).read().decode("utf-8")
     except Exception:
-        return []
+        return {"description": "", "links": []}
 
     match = re.search(
         r"var ytInitialData\s*=\s*({.*?});\s*</script>", html, re.DOTALL
     )
     if not match:
-        return []
+        return {"description": "", "links": []}
 
     try:
         data = json.loads(match.group(1))
     except json.JSONDecodeError:
-        return []
+        return {"description": "", "links": []}
 
+    description = ""
     links = []
     try:
         contents = (
@@ -103,6 +110,8 @@ def fetch_description_links(video_id: str) -> list[dict]:
                 continue
             desc = renderer.get("attributedDescription", {})
             content = desc.get("content", "")
+            description = content  # full plain-text description as shown on YouTube
+
             runs = desc.get("commandRuns", [])
             for run in runs:
                 cmd = run.get("onTap", {}).get("innertubeCommand", {})
@@ -129,7 +138,7 @@ def fetch_description_links(video_id: str) -> list[dict]:
     except (KeyError, IndexError, TypeError):
         pass
 
-    return links
+    return {"description": description, "links": links}
 
 
 def main():
@@ -168,12 +177,15 @@ def main():
         result["raw_transcript"] = ""
         result["transcript_error"] = str(e)
 
-    # Description links
+    # Description text and links (single page fetch, no extra HTTP request)
     try:
-        result["description_links"] = fetch_description_links(video_id)
+        desc_data = fetch_description_data(video_id)
+        result["description"] = desc_data["description"]
+        result["description_links"] = desc_data["links"]
     except Exception as e:
+        result["description"] = ""
         result["description_links"] = []
-        result["links_error"] = str(e)
+        result["description_error"] = str(e)
 
     print(json.dumps(result, ensure_ascii=False))
 

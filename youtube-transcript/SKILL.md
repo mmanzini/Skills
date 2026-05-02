@@ -13,13 +13,13 @@ description: >
 
 # YouTube Transcript Extractor
 
-Extract a YouTube video's transcript and description links, then transform the raw
+Extract a YouTube video's transcript, description and links, then transform the raw
 captions into a clean, readable markdown document.
 
 ## Step 1: Extract raw data
 
 Run the bundled extraction script. It handles metadata (title, channel), transcript
-fetching and description link scraping in one call:
+fetching, the full description text and description link scraping in one call:
 
 ```bash
 python3 "$(dirname "$0")/scripts/yt_extract.py" "$URL"
@@ -31,6 +31,7 @@ The script outputs a JSON object with these fields:
 - `title` — video title
 - `channel` — channel name
 - `video_url` — canonical URL
+- `description` — full plain-text description as shown on YouTube
 - `raw_transcript` — timestamped transcript lines (`[MM:SS] text`)
 - `description_links` — array of `{text, url}` from the video description
 
@@ -48,7 +49,7 @@ flowing text:
 3. **Group sentences into paragraphs** by topic. When the speaker shifts to a new idea,
    start a new paragraph.
 4. **Add section headings** (##) where the topic clearly changes. Use short, descriptive
-   headings that reflect the content. If the video description includes chapter markers
+   headings that reflect the content. If the `description` includes chapter markers
    (lines like `0:00 Intro`, `2:30 The Demo`), use those as a guide for section
    boundaries and heading names.
 5. **Fix obvious speech-to-text errors** — e.g. "claw code" should be "Claude Code",
@@ -70,6 +71,12 @@ Use this structure:
 
 ---
 
+## Description
+
+{description — reproduced verbatim, preserving line breaks and any chapter markers}
+
+---
+
 ## {First section heading}
 
 {Readable prose paragraphs...}
@@ -86,7 +93,12 @@ Use this structure:
 - ...
 ```
 
-Rules for the links section:
+Rules for the **Description** section:
+- Reproduce it verbatim — do not summarise or reword.
+- Preserve paragraph breaks and line breaks as they appear in the source.
+- If the description is empty or not available, omit this section entirely.
+
+Rules for the **Useful links** section:
 - Only include links from `description_links` that are genuinely useful (articles,
   newsletters, repos, Discord, social profiles, courses, documentation).
 - Skip generic YouTube links, subscriber links, or empty/broken URLs.
