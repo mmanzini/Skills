@@ -21,6 +21,18 @@ The five configured repos and their Atlas paths:
 
 ## Workflow
 
+### 0. Pull latest from GitHub
+
+Pull the latest from each configured repo before syncing so local clones are up to date:
+
+```bash
+for repo in ai-engineering skills political-economy github-trending-digest agentic-persistent-knowledge-management-system; do
+  git -C ~/Documents/repos/$repo pull --ff-only
+done
+```
+
+If any repo fails to fast-forward (diverged history), surface the error and stop before proceeding with the sync.
+
 ### 1. Determine scope
 
 If the user passed an argument (`$ARGUMENTS`), run only that repo:
@@ -69,7 +81,24 @@ Status icons:
 
 If any repo failed, append the raw log lines for that repo under the table so the user can diagnose.
 
-### 4. Conflict resolution hint
+### 4. Push changes to GitHub
+
+After the sync, check each repo for uncommitted or unpushed changes and push:
+
+```bash
+for repo in ai-engineering skills political-economy github-trending-digest agentic-persistent-knowledge-management-system; do
+  repo_path=~/Documents/repos/$repo
+  if [[ -n "$(git -C $repo_path status --porcelain | grep -v '.DS_Store')" ]]; then
+    git -C $repo_path add -A ':!*.DS_Store'
+    git -C $repo_path commit -m "sync: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    git -C $repo_path push
+  fi
+done
+```
+
+Note: The sync script already handles push automatically for most cases — this step catches anything left unstaged.
+
+### 5. Conflict resolution hint
 
 If any repo has conflicts, append:
 
@@ -77,6 +106,10 @@ If any repo has conflicts, append:
 Conflict resolution:
   prefer Atlas:  unison <repo> -prefer ~/Documents/Atlas/<atlas-path>
   prefer GitHub: unison <repo> -prefer ~/Documents/repos/<repo>
+
+Exception — github-trending-digest syncs only the trending/ subfolder of the repo:
+  prefer Atlas:  unison github-trending-digest -prefer ~/Documents/Atlas/Resources/github-trends
+  prefer GitHub: unison github-trending-digest -prefer ~/Documents/repos/github-trending-digest/trending
 ```
 
 ## Important rules
