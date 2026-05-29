@@ -17,7 +17,7 @@ The five configured repos and their Atlas paths:
 | `political-economy` | `Intelligence/political-economy/` |
 | `github-trending-digest` | `Resources/github-trends/` |
 | `skills` | `Skills/` |
-| `agentic-persistent-knowledge-management-system` | `Resources/projects/agentic-persistent-knowledge-management-system/` |
+| `agentic-knowledge-engine` | `Resources/projects/agentic-knowledge-engine/` |
 
 ## Workflow
 
@@ -26,7 +26,7 @@ The five configured repos and their Atlas paths:
 Pull the latest from each configured repo before syncing so local clones are up to date:
 
 ```bash
-for repo in ai-engineering skills political-economy github-trending-digest agentic-persistent-knowledge-management-system; do
+for repo in ai-engineering skills political-economy github-trending-digest agentic-knowledge-engine; do
   git -C ~/Documents/repos/$repo pull --ff-only
 done
 ```
@@ -86,7 +86,7 @@ If any repo failed, append the raw log lines for that repo under the table so th
 After the sync, check each repo for uncommitted or unpushed changes and push:
 
 ```bash
-for repo in ai-engineering skills political-economy github-trending-digest agentic-persistent-knowledge-management-system; do
+for repo in ai-engineering skills political-economy github-trending-digest agentic-knowledge-engine; do
   repo_path=~/Documents/repos/$repo
   if [[ -n "$(git -C $repo_path status --porcelain | grep -v '.DS_Store')" ]]; then
     git -C $repo_path add -A ':!*.DS_Store'

@@ -15,7 +15,7 @@ Trigger the Atlas ↔ GitHub bidirectional sync and get a per-repo status report
 | `political-economy` | `Intelligence/political-economy/` | outbound |
 | `github-trending-digest` | `Resources/github-trends/` | inbound |
 | `skills` | `Skills/` | mirror |
-| `agentic-persistent-knowledge-management-system` | `Resources/projects/agentic-persistent-knowledge-management-system/` | outbound |
+| `agentic-knowledge-engine` | `Resources/projects/agentic-knowledge-engine/` | outbound |
 
 ## What the sync does
 
