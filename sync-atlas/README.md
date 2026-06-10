@@ -2,6 +2,9 @@
 
 Trigger the Atlas ↔ GitHub bidirectional sync and get a per-repo status report.
 
+> **Note:** this skill is registered as a slash-command plugin via
+> `commands/sync-atlas.md` — there is intentionally no `SKILL.md` here.
+
 ## Commands
 
 - `/sync-atlas` — sync all five repos and report results
