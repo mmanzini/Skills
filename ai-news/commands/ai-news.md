@@ -1,19 +1,29 @@
 ---
-description: Get AI industry news from the last 24 hours or weekly digest if no breaking news
+description: Get AI industry news from the last 24 hours plus an always-on weekly digest (models, tooling, hardware, policy, funding, research)
 argument-hint: ""
 ---
 
 # AI News Watcher
 
-Monitor 20+ AI companies across Western and Asian markets for significant news from the last 24 hours. If no breaking news is found, provide a weekly digest of the most important updates from the past 7 days.
+Monitor 40+ AI companies, labs, and policy bodies across Western and Asian markets for significant news from the last 24 hours, then always close with a weekly digest of the most important updates from the past 7 days.
 
-## Companies Monitored
+## Coverage
 
-**Foundation Models (Western)**: OpenAI, Anthropic, Google/DeepMind, Meta, Microsoft, xAI, Mistral, Cohere
+**Foundation Models (Western)**: OpenAI, Anthropic, Google/DeepMind, Meta, Microsoft, xAI, Mistral, Cohere, Amazon (Nova), Apple, AI2 (Allen Institute)
 
-**Foundation Models (Asian)**: Alibaba/Qwen, DeepSeek, ByteDance/Doubao, Baidu/ERNIE, Zhipu AI (GLM/ChatGLM), Moonshot AI (Kimi)
+**Foundation Models (Asian)**: Alibaba/Qwen, DeepSeek, ByteDance/Doubao, Baidu/ERNIE, Zhipu AI (GLM/ChatGLM), Moonshot AI (Kimi), Tencent (Hunyuan), MiniMax, 01.AI (Yi), StepFun
+
+**Agent & Dev Tooling**: Cursor, Cognition (Devin), Replit, GitHub Copilot, Windsurf, OpenHands
 
 **Specialised Tools**: Perplexity, Midjourney, Runway, Stability AI, Character.AI, ElevenLabs, Hugging Face
+
+**Hardware & Infrastructure**: Nvidia, AMD, Groq, Cerebras, TSMC (AI-relevant), CoreWeave
+
+**Policy & Regulation**: EU AI Act developments, US executive/Congressional actions, China AI regulations, UK AISI and other safety institutes
+
+**Funding & Business**: major funding rounds, acquisitions, valuation news across the AI sector
+
+**Research & Safety**: notable papers, new benchmarks, safety-institute and lab safety reports
 
 ## Workflow
 
@@ -36,6 +46,29 @@ Use WebSearch to query each company with 3-5 diverse queries. Use the current mo
 - Search using the model name directly when it differs from the company name. For example, search "Qwen" not just "Alibaba", search "Kimi" not just "Moonshot", search "Doubao" not just "ByteDance", search "ERNIE" alongside "Baidu", and search "GLM" or "ChatGLM" alongside "Zhipu".
 
 **Useful English-language sources for Asian AI news**: South China Morning Post, TechNode, Pandaily, 36Kr English, TechCrunch, The Information, Reuters, Bloomberg. These often cover Chinese AI releases faster than the companies' own English blogs.
+
+**For agent/dev tooling:**
+- "[Tool] release [current month] [current year]"
+- "[Tool] new feature agent"
+- "[Tool] changelog update"
+
+**For hardware/infra:**
+- "[Company] AI chip announcement [current month] [current year]"
+- "[Company] datacenter GPU launch"
+
+**For policy/regulation:**
+- "EU AI Act [current month] [current year]"
+- "AI regulation announcement [current month] [current year]"
+- "AI executive order congress bill"
+- "China AI regulation [current year]"
+
+**For funding & business:**
+- "AI startup funding round [current month] [current year]"
+- "AI acquisition [current month] [current year]"
+
+**For research & safety:**
+- "AI benchmark paper [current month] [current year]"
+- "AI safety institute report [current month] [current year]"
 
 Focus on official blogs, release notes, changelogs, and authoritative tech news sources.
 
@@ -70,7 +103,7 @@ Verify publish dates are within last 24 hours using current date.
 
 ### 4. Output Format
 
-**If breaking news found (last 24h)**:
+**If breaking news found (last 24h)**, lead with it:
 
 ```
 🗞️ **AI News -- [DATE]**
@@ -84,7 +117,7 @@ Verify publish dates are within last 24 hours using current date.
 (Show up to 5 items; if more than 5, add "+ N more")
 ```
 
-**If no breaking news (weekly digest)**:
+**Weekly digest (ALWAYS included — after breaking news if any, alone otherwise)**:
 
 ```
 📰 **AI Weekly Digest -- [START DATE - END DATE]**
@@ -97,11 +130,25 @@ Verify publish dates are within last 24 hours using current date.
 • **[Vendor]** ([Date]): [Headline] -- [summary]
   🔗 [Read more]([URL])
 
-💼 **Partnerships & Business**
+💼 **Partnerships & Business / Funding**
 • **[Vendor]** ([Date]): [Headline] -- [summary]
   🔗 [Read more]([URL])
 
-📊 **Coverage**: OpenAI • Anthropic • Google • Microsoft • Meta • xAI • Mistral • Perplexity • Qwen • DeepSeek • ByteDance • Baidu • Zhipu AI • Moonshot AI • Midjourney • Runway • ElevenLabs • Hugging Face
+🔬 **Research & Safety**
+• **[Lab/Body]** ([Date]): [Headline] -- [summary]
+  🔗 [Read more]([URL])
+
+🖥️ **Hardware & Infrastructure**
+• **[Vendor]** ([Date]): [Headline] -- [summary]
+  🔗 [Read more]([URL])
+
+🏛️ **Policy & Regulation**
+• **[Body]** ([Date]): [Headline] -- [summary]
+  🔗 [Read more]([URL])
+
+(Omit any category with no items this week.)
+
+📊 **Coverage**: OpenAI • Anthropic • Google • Microsoft • Meta • xAI • Mistral • Amazon • Apple • AI2 • Perplexity • Qwen • DeepSeek • ByteDance • Baidu • Zhipu AI • Moonshot AI • Tencent • MiniMax • 01.AI • StepFun • Cursor • Cognition • Replit • Copilot • Windsurf • Midjourney • Runway • ElevenLabs • Hugging Face • Nvidia • AMD • Groq • Cerebras • CoreWeave • Policy (EU/US/CN/UK)
 ```
 
 ### 5. Categorisation Rules
@@ -117,11 +164,24 @@ Verify publish dates are within last 24 hours using current date.
 - Performance enhancements
 - UI/UX updates
 
-**Partnerships & Business**:
+**Partnerships & Business / Funding**:
 - Acquisitions and mergers
 - Strategic integrations
-- Major business deals
+- Major business deals and funding rounds
 - Corporate restructuring
+
+**Research & Safety**:
+- Notable papers and new benchmarks
+- Safety-institute and lab safety reports
+- Significant open-source research releases
+
+**Hardware & Infrastructure**:
+- Chip launches and roadmaps
+- Datacenter/compute buildouts and capacity deals
+
+**Policy & Regulation**:
+- New laws, regulations, executive actions
+- Enforcement actions and major government AI initiatives
 
 ## Ranking Priority
 

@@ -22,6 +22,26 @@ prediction: <prose>
 investigate: [ <str>, ... ]
 ```
 
+## ai-news.md  (prose + table, no chart)
+```yaml
+updated: <ISO>
+news_refreshed: <YYYY-MM-DD>
+window: "since <YYYY-MM-DD> (max 7d)"
+items:                       # NEW items only (not in the body ledger), newest first, cap ~10
+  - { vendor: <str>, headline: <str>, summary: <str>, url: <url>,
+      date: <YYYY-MM-DD>, category: release|product|business|research|hardware|policy|funding|safety }
+reaction: <prose>            # world-reaction recap (markets, press, community)
+weekly_digest: <prose>       # always present: 7-day recap, includes previously-shown items
+sources: [ <str>, ... ]      # optional
+```
+File **body** (below frontmatter) holds the dedup ledger — renderer ignores it:
+```markdown
+## Previously shown
+- YYYY-MM-DD — Vendor — "headline" — https://…
+```
+Resolver reads it before writing (skip listed URLs), appends new items after,
+prunes >30-day entries, caps ~300 lines.
+
 ## political-economy.md  (prose only, no chart)
 ```yaml
 updated: <ISO>

@@ -30,6 +30,10 @@ detail in `references/resolvers.md` — summary:
    → JSON; drop its `metrics` array + `as_of` into `data/life.md`.
 3. **github-trends** (LLM): synthesize `summary_week`/`summary_month`/`prediction`/
    `investigate` from `Intelligence/github-trends/` → `data/github-trends.md`.
+3a. **ai-news** (LLM + live web): sweep AI-industry news since the last refresh
+   (max 7 days), dedup against the `## Previously shown` ledger in the file body,
+   add a world-reaction recap and an always-on weekly digest →
+   `data/ai-news.md`. See `references/resolvers.md`.
 3b. **political-economy** (LLM + live web): blend `Intelligence/political-economy/`
    + `Intelligence/philosophy/` with live web-news (threads derived dynamically) →
    `data/political-economy.md`. See `references/resolvers.md`.

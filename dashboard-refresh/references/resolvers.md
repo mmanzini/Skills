@@ -56,6 +56,37 @@ write:
 
 Stamp `as_of` (from the script) and `window_days: 14`.
 
+## 3a. ai-news → `data/ai-news.md`  (LLM + live web, dedup ledger)
+
+Expanded version of the `/ai-news` command (`Skills/ai-news/commands/ai-news.md`
+holds the full company/category list and query templates — reuse them).
+
+1. **Window:** read `data/ai-news.md`. Window = since its `news_refreshed` date,
+   capped at **7 days** back (file missing/blank → 7 days). Parse the
+   `## Previously shown` ledger in the file **body** → set of already-shown URLs.
+2. **Sweep:** WebSearch across the coverage list in
+   `Skills/ai-news/commands/ai-news.md` — Western + Asian foundation models,
+   agent/dev tooling, hardware/infra, policy/regulation, funding & business,
+   research/safety. Date-scope queries with the current month/year; use the
+   Asian-coverage source hints (SCMP, TechNode, Pandaily, 36Kr, Reuters …);
+   search model names (Qwen, Kimi, Doubao, ERNIE, GLM) not just company names.
+3. **Filter + dedup:** keep significant items (release/launch/update/model/
+   policy/funding/safety…), verify publish dates fall in the window, drop any
+   URL already in the ledger. Newest first, cap ~10 →
+   `items:[{vendor,headline,summary,url,date,category}]`,
+   `category ∈ {release,product,business,research,hardware,policy,funding,safety}`.
+4. **Reaction:** one extra search pass on the 2–3 biggest items
+   ("<headline> reaction", market/analyst/community coverage) → `reaction` =
+   3–5 sentence prose on how markets, press, and the community are responding.
+5. **Weekly digest (always):** `weekly_digest` = prose recap of the full last
+   7 days grouped by theme — includes previously-shown items, not just new ones.
+6. **Write:** frontmatter per `assets/schemas/data-files.md` (`updated` ISO,
+   `news_refreshed` today, `window`, optional `sources`). Then **append** the new
+   items to the `## Previously shown` ledger
+   (`- YYYY-MM-DD — Vendor — "headline" — URL`), prune entries older than 30
+   days, cap ~300 lines. If web is unavailable, leave the file untouched
+   (hard rule 4).
+
 ## 3b. political-economy → `data/political-economy.md`  (LLM + live web, no chart)
 
 1. **Standing analysis:** read `Intelligence/political-economy/_master-index.md`
