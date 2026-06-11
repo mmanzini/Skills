@@ -9,6 +9,25 @@ Regenerate the Atlas dashboard's data layer. You **only** write `Dashboard/data/
 Never edit `Dashboard/scripts/Dashboard.js` or `Dashboard/Dashboard.md` —
 presentation is fixed (see `Dashboard/CLAUDE.md`).
 
+## Execution contract (read first)
+
+This skill is **not done after one step**. A run MUST process **every** resolver
+in the Run order below and leave **all six** `Dashboard/data/*.md` files with a
+fresh `updated:`/`as_of:` stamp (today) — unless a source is genuinely
+unavailable, in which case leave that one file untouched and say so in the final
+report. Do not stop after the deterministic `tasks` script; the LLM-synthesis
+resolvers (github-trends, ai-news, political-economy, life prose, upcoming) are
+the point of the refresh and are mandatory.
+
+**This is a dashboard-only task. Do NOT touch the Tasks board** (`Tasks/TASKS.md`,
+`Tasks/ledger.md`, `_tasks-archive.md`). If a Stop hook or session reminder asks
+you to reconcile the task board, that is out of scope for this run — finish the
+dashboard first; the board is maintained in interactive sessions, not here.
+
+Checklist — tick all before finishing:
+`tasks` · `life metrics` · `github-trends` · `ai-news` · `political-economy` ·
+`life prose` · `upcoming`.
+
 ## Hard rules
 
 1. Write only inside `Dashboard/data/`.
