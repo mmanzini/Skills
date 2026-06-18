@@ -37,6 +37,12 @@ Checklist — tick all before finishing:
 4. If a source is unavailable, **leave that file's existing data in place** —
    degrade gracefully, never blank a section.
 5. One section = one resolver = one data file. New sources are new resolvers.
+6. **Quote risky scalars.** Any string value or list item containing `: `
+   (colon-space), a leading `-`/`?`/`[`/`{`/`@`/`` ` ``, or `#` mid-line must be
+   wrapped in double quotes. A bare `: ` makes YAML parse the item as a `key:
+   value` map and silently breaks the whole file's frontmatter → the section
+   vanishes from the dashboard. Block scalars (`>-`, `|-`) are safe; plain
+   list items (`highlights`, `actions`, `investigate`, `watch`) are not.
 
 ## Run order
 
@@ -66,7 +72,10 @@ See `references/resolvers.md` for the precise rules of each.
 
 ## After writing
 
-- Confirm each touched file's frontmatter parses (valid YAML).
+- Confirm each touched file's frontmatter parses (valid YAML). Run:
+  `python3 -c "import yaml,sys; yaml.safe_load(open(f).read().split('---')[1])"`
+  per touched file. A parse failure means an unquoted scalar (hard rule 6) —
+  fix and re-check before reporting done.
 - Dataview auto-refresh (~2.5s) re-renders the open `Dashboard.md`; no reload needed.
 - Report one line: which sections refreshed, which were skipped and why.
 
