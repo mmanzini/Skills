@@ -56,7 +56,8 @@ sources: [ <str>, ... ]   # optional
 
 ## life.md
 ```yaml
-as_of: <YYYY-MM-DD>
+updated: <ISO>        # real refresh clock (the badge stamp) — separate from as_of
+as_of: <YYYY-MM-DD>   # data-window end = latest daily note (may lag `updated` by a day)
 window_days: 14
 happened: <prose>
 now: <prose>

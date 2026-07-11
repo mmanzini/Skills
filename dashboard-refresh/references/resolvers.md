@@ -54,7 +54,11 @@ write:
 - `actions` — concrete next to-dos (list);
 - `prediction` — a slight, grounded forward read.
 
-Stamp `as_of` (from the script) and `window_days: 14`.
+Stamp `updated` (real refresh clock, e.g. `date -u +%Y-%m-%dT%H:%M`), `as_of`
+(from the script — the latest daily note, which may lag `updated` by a day when
+today's daily note doesn't exist yet), and `window_days: 14`. The renderer badge
+reads `updated ?? as_of`; without `updated`, life reads a day stale next to the
+other sections whenever today's daily note hasn't been written.
 
 ## 3a. ai-news → `data/ai-news.md`  (LLM + live web, dedup ledger)
 

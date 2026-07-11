@@ -44,6 +44,27 @@ Checklist — tick all before finishing:
    vanishes from the dashboard. Block scalars (`>-`, `|-`) are safe; plain
    list items (`highlights`, `actions`, `investigate`, `watch`) are not.
 
+## Execution strategy — fan out the LLM resolvers
+
+Run the five LLM resolvers (github-trends, ai-news, political-economy, life
+prose, upcoming) as **parallel subagents** (Task tool or Workflow), one per
+resolver, each given its exact input file paths and required output schema.
+The orchestrator (you) runs only the deterministic scripts, collects the
+subagent outputs, and writes the data files (single writer — apply hard rule
+6 quoting; stamp `updated:` from the real clock via `date`, never a guessed
+time). This matters twice over:
+
+- **Context ceiling.** A serial headless run accumulates every web sweep in
+  one context and can cross the 200K long-context gate ("Usage credits are
+  required for long context requests"). Subagents each get a fresh, small
+  context; the orchestrator stays far under the gate.
+- **Wall clock.** The web sweeps (ai-news, political-economy) dominate the
+  run; in parallel the whole refresh takes ~7 min instead of serial ~7 min
+  per-sweep stacking.
+
+If the runtime has no subagent support, fall back to serial — but then keep
+each sweep lean (cap search rounds) to stay under the context gate.
+
 ## Run order
 
 Deterministic resolvers are scripts; prose resolvers are LLM synthesis. Full
@@ -82,5 +103,9 @@ See `references/resolvers.md` for the precise rules of each.
 ## Invocation
 
 - **Terminal pane:** `claude` → `/dashboard-refresh`.
-- **Button / headless:** `claude -p "Read Skills/dashboard-refresh/SKILL.md and execute it"`
-  (cwd = vault root), wired to the obsidian-shellcommands "Refresh Dashboard" command.
+- **Button / headless:**
+  `env -u ANTHROPIC_API_KEY claude --model claude-opus-4-8 -p "/dashboard-refresh"`
+  (cwd = vault root), wired to the obsidian-shellcommands "Refresh Dashboard"
+  command. `env -u` guards against a stale system-level API key shadowing the
+  keychain login; the Opus pin avoids the Sonnet long-context tier routing that
+  gates headless runs behind usage credits.
