@@ -33,7 +33,11 @@ Checklist — tick all before finishing:
 1. Write only inside `Dashboard/data/`.
 2. Preserve each file's frontmatter **schema** (see `assets/schemas/data-files.md`).
    Adding keys is OK; renaming/removing breaks the matching renderer method.
-3. Stamp `updated:` / `as_of` on every file you touch.
+3. Stamp `updated:` / `as_of` on every file you touch — from the real clock in
+   **local time** (`date +%Y-%m-%dT%H:%M`), never guessed and never `date -u`.
+   The renderer's freshness badges compare stamps against local now and the
+   deterministic tasks script stamps local, so a UTC stamp makes every section
+   read hours stale (seen 2026-07-25).
 4. If a source is unavailable, **leave that file's existing data in place** —
    degrade gracefully, never blank a section.
 5. One section = one resolver = one data file. New sources are new resolvers.
